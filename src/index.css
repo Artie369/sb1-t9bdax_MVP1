@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --gradient-start: #FF4D8D;
+    --gradient-middle: #B44DFF;
+    --gradient-end: #4D7FFF;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full
+    hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-lg
+    hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 border-2 border-purple-500 text-purple-500 font-semibold rounded-full
+    hover:bg-purple-50 transition-all duration-300
+    focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+  }
+
+  .input-primary {
+    @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-purple-500 
+    focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+  }
+}
+
+.video-scroll {
+  scroll-snap-type: y mandatory;
+  height: calc(100vh - 4rem);
+}
+
+.video-scroll > div {
+  scroll-snap-align: start;
+  height: 100%;
+}

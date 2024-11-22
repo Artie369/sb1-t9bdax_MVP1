@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isNotBlocked(userId) {
+      return !exists(/databases/$(database)/documents/users/$(userId)/blocked/$(request.auth.uid)) &&
+             !exists(/databases/$(database)/documents/users/$(request.auth.uid)/blocked/$(userId));
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Allow reading all users if authenticated and not blocked
+      allow read: if isAuthenticated();
+      // Allow user creation and profile updates
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Blocked subcollection
+      match /blocked/{blockedId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Matches collection
+    match /matches/{matchId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.users;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && request.auth.uid in resource.data.users;
+    }
+
+    // Messages collection
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && 
+        request.auth.uid in get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.users;
+      allow create: if isAuthenticated() && 
+        request.auth.uid in get(/databases/$(database)/documents/matches/$(request.resource.data.matchId)).data.users;
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.senderId;
+      allow delete: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/matches/$(resource.data.matchId)).data.users;
+    }
+  }
+}
